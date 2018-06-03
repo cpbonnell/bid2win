@@ -27,19 +27,36 @@ class Querent:
         self.bids_fp = Path(archive_dir + '/bids.csv')
         
         if self.customers_fp.is_file():
-            self.customers = pd.read_csv(self.customers_fp)
+            self.customers = pd.read_csv(self.customers_fp, index_col = 0)
         else:
             self.customers = pd.DataFrame()
         
         if self.bids_fp.is_file():
-            self.bids = pd.read_csv(self.bids_fp)
+            self.bids = pd.read_csv(self.bids_fp, index_col = 0)
         else:
             self.bids = pd.DataFrame()
         
         self.api_key = api_key
     #END
     
-    
+    def get_next_user(self):
+        payload = {'api_key': self.api_key}
+        
+        ## Query the server, and unpack the JSON to a dict
+        response = requests.post(self.url['next_user'], json = payload)
+        json_response = json.loads(response.text)
+        
+        ## Convert the dict to a data frame, using the appripriate index
+        ind = json_response['user_index']
+        df_response = pd.DataFrame(json_response, index = [ind])
+        
+        ## Append the data frame to the list of users already known, and
+        ## persist the new data frame
+        self.customers.append(df_response)
+        self.customers.to_csv(self.customers_fp)
+        
+        return df_response
+    #END
     
     
     
