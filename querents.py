@@ -36,6 +36,9 @@ class Querent:
         else:
             self.bids = pd.DataFrame()
         
+        self.customers_fp = Path(archive_dir + '/customers.csv').as_posix()
+        self.bids_fp = Path(archive_dir + '/bids.csv').as_posix()
+        
         self.api_key = api_key
     #END
     
@@ -58,7 +61,7 @@ class Querent:
         
         ## Append the data frame to the list of users already known, and
         ## persist the new data frame
-        self.customers.append(df_response)
+        self.customers = self.customers.append(df_response)
         self.customers.to_csv(self.customers_fp)
         
         
@@ -66,7 +69,20 @@ class Querent:
     #END
     
     
-    def place_bid(self, bid):
+    def place_bid(self, bid, user_id = None):
+        
+        ## First handle the case where we have lost data and need to bid
+        ## on someone listed in an error
+        if user_id is not None:
+            payload = {
+                'api_key':self.api_key,
+                'user_id':user_id,
+                'bid_amount':bid
+            }
+            response = requests.post(self.url['place_bid'], json = payload)
+            json_response = json.loads(response.text)
+            return json_response
+        #END emergency handling
         
         ## Start by grabbing the user we need to place a bit on...
         for_bid_ix = self.customers.bid < 0
@@ -75,6 +91,7 @@ class Querent:
             raise ValueError('The number of customers needing a bid is greater than 1. Please repair table.')
         elif for_bid.shape[0] < 1:
             raise ValueError('No customers currently need a bid. Please use get_nextuser().')
+        
             
         
         ## Construct the payload
@@ -96,9 +113,20 @@ class Querent:
         ## Package the results, add to the data frame and persist
         df_response = pd.DataFrame(json_response, index = [ind])
         
+        self.customers.loc[ind, 'bid'] = bid
+        self.bids = self.bids.append(df_response)
+        
+        self.customers.to_csv(self.customers_fp)
+        self.bids.to_csv(self.bids_fp)
         
         return df_response
     #END
     
+    
+    def get_progress(self):
+        
+        response = requests.post(self.url['how_am_doing'], json = {'api_key':self.api_key})
+        json_response = json.loads(response.text)
+        return json_response
     
 #END class
