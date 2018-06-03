@@ -46,7 +46,13 @@ class Querent:
         response = requests.post(self.url['next_user'], json = payload)
         json_response = json.loads(response.text)
         
-        ## Convert the dict to a data frame, using the appripriate index
+        ## Handle errors:
+        if json_response['result'] == 'failure':
+            return json_response
+        
+        ## Convert the dict to a data frame, using the appripriate index, and
+        ## making sure there is space to record the bid
+        json_response['bid'] = -1
         ind = json_response['user_index']
         df_response = pd.DataFrame(json_response, index = [ind])
         
@@ -55,9 +61,15 @@ class Querent:
         self.customers.append(df_response)
         self.customers.to_csv(self.customers_fp)
         
+        
         return df_response
     #END
     
+    
+    def place_bid(self, bid):
+        pass
+        
+    #END
     
     
 #END class
