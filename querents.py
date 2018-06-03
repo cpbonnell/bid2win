@@ -114,6 +114,7 @@ class Querent:
         df_response = pd.DataFrame(json_response, index = [ind])
         
         self.customers.loc[ind, 'bid'] = bid
+        self.customers.loc[ind, 'win'] = json_response['win']
         self.bids = self.bids.append(df_response)
         
         self.customers.to_csv(self.customers_fp)
