@@ -67,8 +67,37 @@ class Querent:
     
     
     def place_bid(self, bid):
-        pass
         
+        ## Start by grabbing the user we need to place a bit on...
+        for_bid_ix = self.customers.bid < 0
+        for_bid = self.customers.loc[for_bid_ix, :]
+        if for_bid.shape[0] > 1:
+            raise ValueError('The number of customers needing a bid is greater than 1. Please repair table.')
+        elif for_bid.shape[0] < 1:
+            raise ValueError('No customers currently need a bid. Please use get_nextuser().')
+            
+        
+        ## Construct the payload
+        ind = for_bid.index[0]
+        payload = {
+            'api_key':self.api_key,
+            'user_id':for_bid.loc[ind, 'user_id'],
+            'bid_amount':bid
+        }
+        
+        ## Send the bid and record the results
+        response = requests.post(self.url['place_bid'], json = payload)
+        json_response = json.loads(response.text)
+        
+        ## Handle errors:
+        if json_response['result'] != 'success':
+            return json_response
+        
+        ## Package the results, add to the data frame and persist
+        df_response = pd.DataFrame(json_response, index = [ind])
+        
+        
+        return df_response
     #END
     
     
