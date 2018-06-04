@@ -20,8 +20,8 @@ def frame_to_features(df):
     features['saturday'] = (df['day_of_week'] == 'Saturday').astype(np.float64)
     features['female'] = (df['gender'] == 'F').astype(np.float64)
     features['marital_status'] = (df['marital_status'] == 'M').astype(np.float64)
-    features['age'] = (df['age'] - df.age.mean()) / df.age.std()
-    features['income'] = (df['income'] - df.income.mean()) / df.income.std()
+    features['age'] = (df['age'] - 42.62266) / 13.340682
+    features['income'] = (df['income'] - 85068.38652) / 37527.481327
     
     return features
 #END
