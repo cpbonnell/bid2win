@@ -50,7 +50,8 @@ class AnnealingBidder(Bidder):
     just not be profitable.
     
     The amount by which we raise the bid each time should go down over time, allowing the
-    algorithm to settle into a steady pattern of bidding.
+    algorithm to settle into a steady pattern of bidding. This is a technique known as
+    'simulated annealing.'
     """
     
     def __init__(self, purchase_model, querent, timescale = 500, initial_increment = 0.50, minimum_increment = 0.01, bids_performed = 0):
@@ -70,8 +71,7 @@ class AnnealingBidder(Bidder):
         while self._qr.customers.shape[0] < 10:
             usr = self._qr.get_next_user()
             b = self.bid_increment()
-            res = self._qr.place_bid(b)
-            self._timestep += 1
+            res = self.place_bid(b)
         
     #END
     
@@ -95,6 +95,14 @@ class AnnealingBidder(Bidder):
         """
         self._timestep += 1
         self._qr.place_bid(bid)
+
+    def execute_bids(self, n = 1):
+        """
+        Place a series of bids.
+        """
+        for i in range(n):
+            self.execute_bid()
+        
 
     def execute_bid(self):
         """
