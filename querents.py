@@ -89,8 +89,9 @@ class Querent:
         #END emergency handling
         
         ## Start by grabbing the user we need to place a bit on...
-        for_bid_ix = self.customers.bid < 0
-        for_bid = self.customers.loc[for_bid_ix, :]
+        #for_bid_ix = self.customers.bid < 0
+        #for_bid = self.customers.loc[for_bid_ix, :]
+        for_bid = self.up_for_bid()
         if for_bid.shape[0] > 1:
             raise ValueError('The number of customers needing a bid is greater than 1. Please repair table.')
         elif for_bid.shape[0] < 1:
