@@ -2,6 +2,8 @@ import pandas as pd
 import requests, json
 from pathlib import Path
 
+from sklearn.neighbors import NearestNeighbors
+
 import utils
 
 
@@ -139,17 +141,37 @@ class Querent:
         json_response = json.loads(response.text)
         return json_response
     
-    def get_comps(self):
+    def get_comps(self, user_id = None, n = 10):
         """
         Get a data frame of the n most similar users to the one currently up
-        for bid.
+        for bid (or another if specified)
         """
 
         ## Look up the customer who is up for bid and calculate their features.
-        for_bid = self.up_for_bid()
-        for_bid_feat = utils.frame_to_features(for_bid)
+        if user_id is None:
+            user = self.up_for_bid()
+        else:
+            match_ind = self.customers.user_id == user_id
+            user = self.customers.loc[match_ind, :]
+            if user.shape[0] == 0:
+                raise ValueError('No users matching the specified user_id')
+        
+        user_feat = utils.frame_to_features(for_bid)
 
-        pass
+        ## Make a NearestNeighbors finder to do the lookup for us
+        no_bid = self.not_up_for_bid()
+        no_bid_feat = utils.frame_to_features(no_bid)
+        nbf = NearestNeighbors(n_neighbors = n)
+        nbf.fit(no_bid_feat)
+
+        ## Now use the neighbor finder to get indices (positional, not from df.index)
+        ind = nbf.kneighbors(user_feat, return_distance=False).flatten()
+
+        ## The indices we have are NOT from the actual existing indices of the df, but
+        ## a relative index of position
+        df = self.customers.iloc[ind]
+
+        return df
     
     def up_for_bid(self):
         """
@@ -167,7 +189,7 @@ class Querent:
         Return the customers data frame, minus any customer(s) currently
         up for bid.
         """
-        for_bid_ind = self.customer.bid < 0
+        for_bid_ind = self.customers.bid < 0
         for_bid_df = self.customers.loc[~for_bid_ind, :]
         
         return for_bid_df
