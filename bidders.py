@@ -20,6 +20,23 @@ class Bidder:
     def execute_bid(self):
         raise NotImplementedError
     
+    def max_bid(self, score):
+        """
+        Return the maximum bid that should be placed for a user with a given score.
+
+        Values taken from analysis of the purchase model's performance conducted in
+        purchase_model.ipynb.
+        """
+        if score < 0.25:
+            num = 1.7326895418122046
+        elif score < 0.5:
+            num = 3.6039537983118612
+        else:
+            num = 5.481774960380348
+        
+        return num
+
+    
 #END class
 
 
@@ -45,6 +62,15 @@ class AnnealingBidder(Bidder):
         self._timestep = bids_performed
         self._qr = querent
         self._mod = purchase_model
+
+        ## We need a minimum of 10 items in the customers table in order for
+        ## NearestNeighbors to not throw an error, so if it is lacking that
+        ## number, we just bid without really looking. The Querent class keeps
+        ## track of everything for us.
+        while self._qr.customers.shape[0] < 10:
+            usr = self._qr.get_next_user()
+            b = self.bid_increment()
+            res = self._qr.place_bid(b)
         
     #END
     
@@ -52,7 +78,7 @@ class AnnealingBidder(Bidder):
         """
         Get the 'temperature' of the search for the purposes of simulated annealing.
         """
-        t = (timescale - bids_performed)/timescale
+        t = (self._timescale - self._timestep)/self._timescale
         return t if t > 0 else 0
 
     def bid_increment(self):
