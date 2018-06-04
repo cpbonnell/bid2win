@@ -2,6 +2,8 @@ import pandas as pd
 import requests, json
 from pathlib import Path
 
+import utils
+
 
 class Querent:
     """
@@ -137,4 +139,37 @@ class Querent:
         json_response = json.loads(response.text)
         return json_response
     
+    def get_comps(self):
+        """
+        Get a data frame of the n most similar users to the one currently up
+        for bid.
+        """
+
+        ## Look up the customer who is up for bid and calculate their features.
+        for_bid = self.up_for_bid()
+        for_bid_feat = utils.frame_to_features(for_bid)
+
+        pass
+    
+    def up_for_bid(self):
+        """
+        Return the record of the user record currently up for bid.
+
+        Return None if there is no user up for bid.
+        """
+        for_bid_ind = self.customers.bid < 0
+        for_bid_df = self.customers.loc[for_bid_ind, :]
+        
+        return for_bid_df
+
+    def not_up_for_bid(self):
+        """
+        Return the customers data frame, minus any customer(s) currently
+        up for bid.
+        """
+        for_bid_ind = self.customer.bid < 0
+        for_bid_df = self.customers.loc[~for_bid_ind, :]
+        
+        return for_bid_df
+
 #END class
