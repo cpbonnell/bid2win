@@ -110,11 +110,18 @@ class Querent:
         if json_response['result'] != 'success':
             return json_response
         
-        ## Package the results, add to the data frame and persist
+        ## Package the results, add to the data frame
         df_response = pd.DataFrame(json_response, index = [ind])
         
+        ## Put the relevant info in the customers table
         self.customers.loc[ind, 'bid'] = bid
         self.customers.loc[ind, 'win'] = json_response['win']
+        self.customers.loc[ind, 'profit'] = 0
+        
+        if json_response['win'] == True and json_response['purchase'] == True:
+            self.customers.loc[ind, 'profit'] = json_response['profit']
+        
+        
         self.bids = self.bids.append(df_response)
         
         self.customers.to_csv(self.customers_fp)
