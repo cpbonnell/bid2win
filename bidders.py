@@ -7,7 +7,18 @@ from sklearn.neighbors import NearestNeighborss
 import querents
 import strategies
 
+
+
 class Bidder:
+    
+    
+    def execute_bid(self):
+        raise NotImplementedError
+    
+#END class
+
+
+class StrategicBidder(Bidder):
     
     _bids_placed = 0
     
@@ -69,7 +80,8 @@ class Bidder:
             upper = 10 if buy_prob > 0.8 else 6
             strat = strategies.random_bid(upper_bound = upper)
         else:
-            
+            #TODO: Finish implementing this class
+            pass
         
         
         ## Step 6: Use the strategy function to calculate a bid amount
