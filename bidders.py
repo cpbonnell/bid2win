@@ -53,7 +53,7 @@ class AnnealingBidder(Bidder):
     algorithm to settle into a steady pattern of bidding.
     """
     
-    def __init__(self, purchase_model, querent, timescale = 500, initial_increment = 1.0, minimum_increment = 0.001, bids_performed = 0):
+    def __init__(self, purchase_model, querent, timescale = 500, initial_increment = 0.50, minimum_increment = 0.001, bids_performed = 0):
         """
         """
         self._timescale = timescale
@@ -71,6 +71,7 @@ class AnnealingBidder(Bidder):
             usr = self._qr.get_next_user()
             b = self.bid_increment()
             res = self._qr.place_bid(b)
+            self._timestep += 1
         
     #END
     
