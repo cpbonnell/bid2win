@@ -2,7 +2,7 @@
 import utils
 import pickle
 from random import random
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import NearestNeighbors, KNeighborsRegressor
 
 import querents
 import strategies
@@ -53,7 +53,7 @@ class AnnealingBidder(Bidder):
     algorithm to settle into a steady pattern of bidding.
     """
     
-    def __init__(self, purchase_model, querent, timescale = 500, initial_increment = 0.50, minimum_increment = 0.001, bids_performed = 0):
+    def __init__(self, purchase_model, querent, timescale = 500, initial_increment = 0.50, minimum_increment = 0.01, bids_performed = 0):
         """
         """
         self._timescale = timescale
@@ -149,9 +149,35 @@ class AnnealingBidder(Bidder):
         ## This leaves us with the final (and most complicated) situaiton:
         ## we know for sure we have a mixed region of wins and losses that
         ## we must sort through to decide where to place our bid.
+        else:
+            smallest_win = wins.bid.min()
+            highest_loss = losses.bid.max()
+            gap = highest_loss - smallest_win
+            if gap < self.bid_increment():
+                # The difference is so small we don't really care
+                new_bid = random()*gap + smallest_win
+            else:
+                # Bigger difference... probably means that there aren't really
+                # enough comps yet and so the ones being returned are not truly
+                # that close to what we are looking at, or that there is an
+                # outlier.
+                #
+                # In either case, we should be fine to try and make a bid
+                # that is close to the two smallest winning bids (or just close
+                # to the singel win if that is all we have)
+                #low_end = smallest_win
+                if wins.shape[0] > 1:
+                    high_end = min(wins.[-2].bid, low_end + self.bid_increment())
+                else:
+                    high_end = self.bid_increment()
+                new_bid = random()*(high_end - low_end) + low_end
+            
+            bid = new_bid if new_bid < bound else bound
+            self.place_bid(bid)
+                
         #END if
-
-    #END
+    ## By this point one of the branches should have picked a bid and placed it
+    #END execute_bid()
     
 #END class
 
@@ -205,7 +231,7 @@ class StrategicBidder(Bidder):
         """
         
         ## Step 0: Initialization
-        previous_feat = frame_to_features(self.qr.customers)
+        previous_feat = utils.frame_to_features(self.qr.customers)
         nb = NearestNeighbors(n_neighbors = 10)
         
         
