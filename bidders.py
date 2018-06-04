@@ -165,9 +165,9 @@ class AnnealingBidder(Bidder):
                 # In either case, we should be fine to try and make a bid
                 # that is close to the two smallest winning bids (or just close
                 # to the singel win if that is all we have)
-                #low_end = smallest_win
+                low_end = smallest_win
                 if wins.shape[0] > 1:
-                    high_end = min(wins.[-2].bid, low_end + self.bid_increment())
+                    high_end = min(wins.iloc[-2].bid, (low_end + self.bid_increment()))
                 else:
                     high_end = self.bid_increment()
                 new_bid = random()*(high_end - low_end) + low_end
