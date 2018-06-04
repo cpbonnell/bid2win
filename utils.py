@@ -23,5 +23,5 @@ def frame_to_features(df):
     features['age'] = (df['age'] - df.age.mean()) / df.age.std()
     features['income'] = (df['income'] - df.income.mean()) / df.income.std()
     
-    return reatures
+    return features
 #END
