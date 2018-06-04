@@ -142,7 +142,7 @@ class Querent:
         json_response = json.loads(response.text)
         return json_response
     
-    def get_comps(self, user_id = None, n = 10):
+    def get_comps(self, user_id = None, n = 6):
         """
         Get a data frame of the n most similar users to the one currently up
         for bid (or another if specified)
