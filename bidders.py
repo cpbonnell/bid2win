@@ -5,6 +5,7 @@ from random import random
 from sklearn.neighbors import NearestNeighborss
 
 import querents
+import strategies
 
 class Bidder:
     
@@ -59,13 +60,16 @@ class Bidder:
         
         ## Step 4: Look up previous bids on comparable users
         ind = nb.kneighbors(user_feat,  return_distance=False).flatten()
-        comps = self.qr.customers.iloc[ind]
+        comps = self.qr.customers.iloc[ind].sort_values(['bid']).loc[:, ['bid', 'win']]
         
         ## Step 5: Use buy-prob to select a strategy
         
         ## First see if we need to explore
-        #if self.explore():
-        #    recommended_bid = 
+        if self.explore():
+            upper = 10 if buy_prob > 0.8 else 6
+            strat = strategies.random_bid(upper_bound = upper)
+        else:
+            
         
         
         ## Step 6: Use the strategy function to calculate a bid amount
