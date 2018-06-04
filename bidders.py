@@ -50,6 +50,18 @@ class AnnealingBidder(Bidder):
 
 
 class StrategicBidder(Bidder):
+    """
+    Bidder class that uses a different bidding strategy based on users likelihood of buying.
+
+    The strategy for this class is to look at whether a user is likely to buy, and construct
+    a bid based on comparison to bids on similar users in the past. The class chooses an 
+    aggressive, balanced, or low-ball strategy based on whether the model thinks the iser is
+    highly likely, uncertian or not likely to purchase.
+
+    To help fill out the data quickly, the class starts off placing a number of random 
+    "exploratory" bids early on in the bidding process. As bidding progresses it places fewer
+    and fewer exploratory bids.
+    """
     
     _bids_placed = 0
     
