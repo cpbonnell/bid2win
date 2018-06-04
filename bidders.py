@@ -36,15 +36,37 @@ class AnnealingBidder(Bidder):
     algorithm to settle into a steady pattern of bidding.
     """
     
-    def __init__(self, purchase_model, querent, timescale = 500):
+    def __init__(self, purchase_model, querent, timescale = 500, initial_increment = 1.0, minimum_increment = 0.001, bids_performed = 0):
         """
         """
         self._timescale = timescale
+        self._increment = initial_increment
+        self._min_inc = minimum_increment
+        self._timestep = bids_performed
         self._qr = querent
         self._mod = purchase_model
         
     #END
     
+    def temperature(self):
+        """
+        Get the 'temperature' of the search for the purposes of simulated annealing.
+        """
+        t = (timescale - bids_performed)/timescale
+        return t if t > 0 else 0
+
+    def bid_increment(self):
+        """
+        Get the amount that the next bid should be incremented by.
+        """
+        b = self._increment * self.temperature()
+        return b if b > self._min_inc else self._min_inc
+
+    def execute_bid(self):
+        """
+        """
+
+    #END
     
 #END class
 
