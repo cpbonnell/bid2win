@@ -156,7 +156,7 @@ class Querent:
             if user.shape[0] == 0:
                 raise ValueError('No users matching the specified user_id')
         
-        user_feat = utils.frame_to_features(for_bid)
+        user_feat = utils.frame_to_features(user)
 
         ## Make a NearestNeighbors finder to do the lookup for us
         no_bid = self.not_up_for_bid()
