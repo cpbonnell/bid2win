@@ -10,10 +10,41 @@ import strategies
 
 
 class Bidder:
-    
+    """
+    Parent bidder class for other types of bidder.
+
+    NOTE: Consider removing this if it looks unneeded after further work
+       on concrete classes.
+    """
     
     def execute_bid(self):
         raise NotImplementedError
+    
+#END class
+
+
+class AnnealingBidder(Bidder):
+    """
+    Bidder class that starts low and increases bid over time.
+    
+    The strategy for this bidder is to start bidding very low on all users, and increase
+    bids as time goes on. Bidding stops when either a) we start winning bids for this type
+    of user, or b) we reach our threshhold above which we think this kind of user will
+    just not be profitable.
+    
+    The amount by which we raise the bid each time should go down over time, allowing the
+    algorithm to settle into a steady pattern of bidding.
+    """
+    
+    def __init__(self, purchase_model, querent, timescale = 500):
+        """
+        """
+        self._timescale = timescale
+        self._qr = querent
+        self._mod = purchase_model
+        
+    #END
+    
     
 #END class
 
