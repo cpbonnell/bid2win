@@ -2,7 +2,7 @@
 import utils
 import pickle
 from random import random
-from sklearn.neighbors import NearestNeighborss
+from sklearn.neighbors import NearestNeighbors
 
 import querents
 import strategies
@@ -89,9 +89,67 @@ class AnnealingBidder(Bidder):
         b = self._increment * self.temperature()
         return b if b > self._min_inc else self._min_inc
 
+    def place_bid(self, bid):
+        """
+        Make a bid and increment the time step.
+        """
+        self._timestep += 1
+        self._qr.place_bid(bid)
+
     def execute_bid(self):
         """
+        Workhorse method that fetches a new user, computes a bid based on the
+        class's strategy, and submits that bid.
         """
+
+        ## First we do the overhead computations needed for all bids we make:
+        user = self._qr.get_next_user()
+        user_feat = utils.frame_to_features(user)
+        score = self._mod.predict_proba(user_feat)[:,1]
+        bound = self.max_bid(score)
+        comps = self._qr.get_comps().sort_values(['bid'], ascending = False)
+
+        wins = comps.loc[comps.win == True, :]
+        losses = comps.loc[~(comps.win == True), :]
+
+        ## Case 1: All too low
+        ## Start with the case which will probably be the majority case
+        ## early on in the bidding process: all bids for comperable users
+        ## have failed, presumably because they are too low.
+        if not any(comps.win):
+            top_bid = comps.iloc[0].bid
+            new_bid = top_bid + self.bid_increment()
+            
+            bid = new_bid if new_bid < bound else bound
+            self.place_bid(bid)
+        
+        ## Should never execute this block, but it is included in case
+        ## the Querent is initialized with odd or unexpected data
+        elif all(comps.win):
+            low_bid = comps.iloc[-1].bid
+            new_bid = low_bid - self.bid_increment()
+            bid = new_bid if new_bid < bound else bound
+            self.place_bid(bid)
+
+        ## We know for sure at this point that we have at least one win and
+        ## at least one loss. It might be the case that all the wins are
+        ## greater than all the losses, in which case we just bid in the
+        ## middle.
+        elif losses.bid.max() < wins.bid.min():
+            gap = wins.bid.min() - losses.bid.max()
+            incr = self.bid_increment()
+            if gap > incr:
+                new_bid = losses.bid.max() + incr
+            else:
+                new_bid = gap*random() + losses.bid.max()
+            
+            bid = new_bid if new_bid < bound else bound
+            self.place_bid(bid)
+
+        ## This leaves us with the final (and most complicated) situaiton:
+        ## we know for sure we have a mixed region of wins and losses that
+        ## we must sort through to decide where to place our bid.
+        #END if
 
     #END
     
@@ -135,7 +193,7 @@ class StrategicBidder(Bidder):
         num = random()
         expl = num < self._explore_prob
         
-        self._explore_prob -= _rate
+        self._explore_prob -= self._rate
         
         return expl
     
