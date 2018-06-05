@@ -68,7 +68,7 @@ class AnnealingBidder(Bidder):
         ## NearestNeighbors to not throw an error, so if it is lacking that
         ## number, we just bid without really looking. The Querent class keeps
         ## track of everything for us.
-        while self._qr.customers.shape[0] < 10:
+        while self._qr.customers.shape[0] < 7:
             usr = self._qr.get_next_user()
             b = self.bid_increment()
             res = self.place_bid(b)
@@ -98,10 +98,11 @@ class AnnealingBidder(Bidder):
 
     def execute_bids(self, n = 1):
         """
-        Place a series of bids.
+        Place a series of bids in succession.
         """
         for i in range(n):
             self.execute_bid()
+        pass
         
 
     def execute_bid(self):
