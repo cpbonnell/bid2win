@@ -131,7 +131,7 @@ class AnnealingBidder(Bidder):
         ## First we do the overhead computations needed for all bids we make:
         user = self._qr.get_next_user()
         user_feat = utils.frame_to_features(user)
-        score = self._mod.predict_proba(user_feat)[:,1]
+        score = self._mod.predict_proba(user_feat)[:,1][0]
         bound = self.max_bid(score)
         comps = self._qr.get_comps().sort_values(['bid'], ascending = False)
 
