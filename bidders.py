@@ -37,14 +37,9 @@ class Bidder:
         ## is used above.
         # if score < 0.25:
         #     #num = 1.7326895418122046
-        #     #num = 1.2326895418122046
-        #     #num = 1.1326895418122046
         #     num = 0.8326895418122046
         # elif score < 0.5:
         #     #num = 3.6039537983118612
-        #     #num = 3.3039537983118612
-        #     #num = 3.0039537983118612
-        #     #num = 2.7039537983118612
         #     num = 2.6039537983118612
         # else:
         #     num = 5.481774960380348
@@ -208,6 +203,12 @@ class AnnealingBidder(Bidder):
 #END class
 
 
+
+
+## NOTE: As of now this class has been abandoned because its strategy is too complicated
+## and therefore a) not the "machine learning" way of doing things, and b) too much time
+## to implement. It will liekly be removed in future commits after a more appropriate
+## method has been found.
 class StrategicBidder(Bidder):
     """
     Bidder class that uses a different bidding strategy based on users likelihood of buying.
