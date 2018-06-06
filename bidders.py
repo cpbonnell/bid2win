@@ -27,12 +27,27 @@ class Bidder:
         Values taken from analysis of the purchase model's performance conducted in
         purchase_model.ipynb.
         """
-        if score < 0.25:
-            num = 1.7326895418122046
-        elif score < 0.5:
-            num = 3.6039537983118612
+        if isinstance(score, list):
+            prob = score[0]
         else:
-            num = 5.481774960380348
+            prob = score
+        num = prob * 10.181258488003621 * 0.9
+
+        ## Note: this is the old code. The newer (and more appropriate) calculation
+        ## is used above.
+        # if score < 0.25:
+        #     #num = 1.7326895418122046
+        #     #num = 1.2326895418122046
+        #     #num = 1.1326895418122046
+        #     num = 0.8326895418122046
+        # elif score < 0.5:
+        #     #num = 3.6039537983118612
+        #     #num = 3.3039537983118612
+        #     #num = 3.0039537983118612
+        #     #num = 2.7039537983118612
+        #     num = 2.6039537983118612
+        # else:
+        #     num = 5.481774960380348
         
         return num
 
@@ -93,6 +108,8 @@ class AnnealingBidder(Bidder):
         """
         Make a bid and increment the time step.
         """
+        if isinstance(bid, list):
+            bid = bid[0]
         self._timestep += 1
         self._qr.place_bid(bid)
 
