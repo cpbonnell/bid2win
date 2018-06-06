@@ -16,11 +16,16 @@ class Bidder:
     """
 
     _qr = None # A Querent object for handling all the web communications
+    _mod = None # A model that gives the probability of a user making a purchase
     _timestep = None # For tracking how far into the bidding process we are
 
+    def purchase_probability(self, user_features):
+        """
+        Use the objects model to predict the likelihood of a user making a purchase.
+        """
+        return self._mod.predict_proba(user_features)[:,1][0]
     
-    
-    def max_bid(self, prob, discount = 0.9):
+    def max_bid(self, prob, discount = 1.0):
         """
         Return the maximum bid that should be placed for a user with a given score.
 
@@ -49,7 +54,7 @@ class Bidder:
         self._qr.place_bid(bid)
     #END
 
-    def execute_bid(self, bid):
+    def execute_bid(self):
         raise NotImplementedError
 
     def execute_bids(self, n = 1):
@@ -60,10 +65,38 @@ class Bidder:
             self.execute_bid()
     #END
 
-    
 #END class
 
 
+
+class DiscountingBidder(Bidder):
+    """
+    Bidder class that starts bidding arround the user's estimated revenue and discounts over time.
+    """
+
+    def __init__(self, purchase_model, querent):
+        self._qr = querent
+        self._mod = purchase_model
+    #END
+
+    def execute_bid(self):
+        """
+        Workhorse method that fetches a new user, computes a bid based on the
+        class's strategy, and submits that bid.
+        """
+        ## First we do the overhead computations needed for all bids we make:
+        user = self._qr.get_next_user()
+        user_feat = utils.frame_to_features(user)
+        score = self._mod.predict_proba(user_feat)[:,1][0]
+        #bound = self.max_bid(score)
+        comps = self._qr.get_comps().sort_values(['bid'], ascending = False)
+    #END
+
+#END class
+
+
+## This class was the second attempd at a bidding method, and was the one that was used for
+## the first half of the production bids.
 class AnnealingBidder(Bidder):
     """
     Bidder class that starts low and increases bid over time.
@@ -123,8 +156,9 @@ class AnnealingBidder(Bidder):
         ## First we do the overhead computations needed for all bids we make:
         user = self._qr.get_next_user()
         user_feat = utils.frame_to_features(user)
-        score = self._mod.predict_proba(user_feat)[:,1][0]
-        bound = self.max_bid(score)
+        #score = self._mod.predict_proba(user_feat)[:,1][0]
+        score = self.purchase_probability(user_feat)
+        bound = self.max_bid(score, discount = 0.9)
         comps = self._qr.get_comps().sort_values(['bid'], ascending = False)
 
         wins = comps.loc[comps.win == True, :]
