@@ -13,38 +13,52 @@ class Bidder:
     """
     Parent bidder class for other types of bidder.
 
-    NOTE: Consider removing this if it looks unneeded after further work
-       on concrete classes.
     """
+
+    _qr = None # A Querent object for handling all the web communications
+    _timestep = None # For tracking how far into the bidding process we are
+
     
-    def execute_bid(self):
-        raise NotImplementedError
     
-    def max_bid(self, score):
+    def max_bid(self, prob, discount = 0.9):
         """
         Return the maximum bid that should be placed for a user with a given score.
 
         Values taken from analysis of the purchase model's performance conducted in
         purchase_model.ipynb.
         """
-        if isinstance(score, list):
-            prob = score[0]
-        else:
-            prob = score
-        num = prob * 10.181258488003621 * 0.9
+        ave_purchase_revenue = 10.181258488003621
+        num = prob * discount * ave_purchase_revenue
 
         ## Note: this is the old code. The newer (and more appropriate) calculation
         ## is used above.
         # if score < 0.25:
-        #     #num = 1.7326895418122046
-        #     num = 0.8326895418122046
+        #     num = 1.7326895418122046
         # elif score < 0.5:
-        #     #num = 3.6039537983118612
-        #     num = 2.6039537983118612
+        #     num = 3.6039537983118612
         # else:
         #     num = 5.481774960380348
         
         return num
+
+    def place_bid(self, bid):
+        """
+        Make a bid and increment the time step.
+        """
+        self._timestep += 1
+        self._qr.place_bid(bid)
+    #END
+
+    def execute_bid(self, bid):
+        raise NotImplementedError
+
+    def execute_bids(self, n = 1):
+        """
+        Place a series of bids in succession.
+        """
+        for i in range(n):
+            self.execute_bid()
+    #END
 
     
 #END class
@@ -99,24 +113,7 @@ class AnnealingBidder(Bidder):
         b = self._increment * self.temperature()
         return b if b > self._min_inc else self._min_inc
 
-    def place_bid(self, bid):
-        """
-        Make a bid and increment the time step.
-        """
-        if isinstance(bid, list):
-            bid = bid[0]
-        self._timestep += 1
-        self._qr.place_bid(bid)
-
-    def execute_bids(self, n = 1):
-        """
-        Place a series of bids in succession.
-        """
-        for i in range(n):
-            self.execute_bid()
-        pass
-        
-
+    
     def execute_bid(self):
         """
         Workhorse method that fetches a new user, computes a bid based on the
@@ -205,7 +202,7 @@ class AnnealingBidder(Bidder):
 
 
 
-## NOTE: As of now this class has been abandoned because its strategy is too complicated
+## NOTE: As of now this class has been *abandoned* because its strategy is too complicated
 ## and therefore a) not the "machine learning" way of doing things, and b) too much time
 ## to implement. It will liekly be removed in future commits after a more appropriate
 ## method has been found.
