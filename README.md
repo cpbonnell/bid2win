@@ -1,6 +1,6 @@
 # bid2win
 ## Introduction
-The goal of this project is to competatively bid on customers in a simulated real-tim bidding environment. Some historic data on past successful bids is available.
+The goal of this project is to competatively bid on customers in a simulated real-time bidding environment. Some historic data on past successful bids is available.
 
 ## General Approach
 The requirements of this project are in general
