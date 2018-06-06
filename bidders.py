@@ -240,7 +240,7 @@ class AnnealingBidder(Bidder):
 ## and therefore a) not the "machine learning" way of doing things, and b) too much time
 ## to implement. It will liekly be removed in future commits after a more appropriate
 ## method has been found.
-class StrategicBidder(Bidder):
+class MultiStratBidder(Bidder):
     """
     Bidder class that uses a different bidding strategy based on users likelihood of buying.
 
