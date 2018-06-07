@@ -68,33 +68,6 @@ class Bidder:
 #END class
 
 
-
-class DiscountingBidder(Bidder):
-    """
-    Bidder class that starts bidding arround the user's estimated revenue and discounts over time.
-    """
-
-    def __init__(self, purchase_model, querent):
-        self._qr = querent
-        self._mod = purchase_model
-    #END
-
-    def execute_bid(self):
-        """
-        Workhorse method that fetches a new user, computes a bid based on the
-        class's strategy, and submits that bid.
-        """
-        ## First we do the overhead computations needed for all bids we make:
-        user = self._qr.get_next_user()
-        user_feat = utils.frame_to_features(user)
-        score = self._mod.predict_proba(user_feat)[:,1][0]
-        #bound = self.max_bid(score)
-        comps = self._qr.get_comps().sort_values(['bid'], ascending = False)
-    #END
-
-#END class
-
-
 ## This class was the second attempd at a bidding method, and was the one that was used for
 ## the first half of the production bids.
 class AnnealingBidder(Bidder):
@@ -234,9 +207,35 @@ class AnnealingBidder(Bidder):
 #END class
 
 
+class DiscountingBidder(Bidder):
+    """
+    Bidder class that starts bidding arround the user's estimated revenue and discounts over time.
+    """
+
+    def __init__(self, purchase_model, querent):
+        self._qr = querent
+        self._mod = purchase_model
+    #END
+
+    def execute_bid(self):
+        """
+        Workhorse method that fetches a new user, computes a bid based on the
+        class's strategy, and submits that bid.
+        """
+        ## First we do the overhead computations needed for all bids we make:
+        user = self._qr.get_next_user()
+        user_feat = utils.frame_to_features(user)
+        score = self._mod.predict_proba(user_feat)[:,1][0]
+        #bound = self.max_bid(score)
+        comps = self._qr.get_comps().sort_values(['bid'], ascending = False)
+
+        raise NotImplementedError
+    #END
+
+#END class
 
 
-## NOTE: As of now this class has been *abandoned* because its strategy is too complicated
+## NOTE: As of now this class has been **abandoned** because its strategy is too complicated
 ## and therefore a) not the "machine learning" way of doing things, and b) too much time
 ## to implement. It will liekly be removed in future commits after a more appropriate
 ## method has been found.
