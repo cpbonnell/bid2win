@@ -22,3 +22,14 @@ For these reasons, our code that abstracts the Web API and JSON payloads will ha
 3. Expose the repository of data in a robust and meaningful way.
 
 These tasks are all handled for our project by the Querent class (noun | que-rent | One who consults an authority, astrologer or source of information).
+
+## Bid Placing Agents
+
+#### AnnealingAgent
+The strategy for this bidder is to start bidding very low on all users, and increase bids as time goes on. Bidding stops when either a) we start winning bids for this type of user, or b) we reach our threshhold above which we think this kind of user will just not be profitable.
+    
+The amount by which we raise the bid each time goes down over time, allowing the algorithm to settle into a steady pattern of bidding. This is a technique known as "**simulated annealing**."
+
+This approach treats the problem of the "adversarial bid" like finding the minimum of an unknown function. Since the adversary may bid drastically lower on some demographics than others, we are actually looking at multiple functions, each of which has its own minimum. The twist is that some of our inputs are continuous, and we don't know what values of those inputs should be treated as "one category" for optimization purposes, except to guess that categories are probably contiguous. If that is the case, then we can gain our insight on how the adversary will bid by looking at our past bids on similar users, and adjusting accordingly.
+
+In this case, the AnnealingAgent uses a **Nearest Neighbors** unsupervised algorithm to identify a list of past bids on similar users. It analyses those bids and decides if it should bid higher than those past bids (because most of them are lost bids), or if it should continue bidding a similar amount. In this way the bidder can settle on bidding around $.90 for one category of users because that is enough, while still continuing to raise the bid on another type of demographic until it reaches $1.50.
