@@ -26,6 +26,8 @@ These tasks are all handled for our project by the Querent class (noun | que-ren
 ## Bid Placing Agents
 
 #### AnnealingAgent
+(Used for the first 2,500 bids)
+
 The strategy for this bidder is to start bidding very low on all users, and increase bids as time goes on. Bidding stops when either a) we start winning bids for this type of user, or b) we reach our threshhold above which we think this kind of user will just not be profitable.
     
 The amount by which we raise the bid each time goes down over time, allowing the algorithm to settle into a steady pattern of bidding. This is a technique known as "**simulated annealing**."
